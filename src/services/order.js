@@ -34,12 +34,13 @@ export const orderApi = createApi({
       }),
       // Trigger re-fetch of `getOrders`, modified orders are not overwritten due to custom merge specified
       invalidatesTags: ['Order'],
-      // Clear sDirty flag
+      // Clear isDirty flag
       async onQueryStarted(order, { dispatch }) {
         dispatch(
           orderApi.util.updateQueryData('getOrders', undefined, (draftOrders) => {
             const index = draftOrders.findIndex(o => o.id === order.id);
-            delete draftOrders[index].__isDirty;
+            // Index will be -1 for newly created order
+            if (index > -1) delete draftOrders[index].__isDirty;
           }),
         );
       },

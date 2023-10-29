@@ -53,7 +53,7 @@ const OrderCellRenderer = ({ data }) => {
       <button
         onClick={() => saveOrderHandler()}
         // disabled={!items} // Enable saving after items are loaded
-        disabled={!order.__isDirty}
+        disabled={!order?.__isDirty}
       >
         Save
       </button>
