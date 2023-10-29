@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux';
 /**
  * Called when query results returned or cache mutated manually to recalculate tags
  */
@@ -13,3 +14,8 @@ export function providesId(resultsWithId, id, tagType) {
     ? [{ type: tagType, id }]
     : ['NOT_FOUND']
 }
+
+export const useIsLoading = () => useSelector(
+  state => Object.values(state.api.queries)
+    .some(query => query.status === 'pending')
+);

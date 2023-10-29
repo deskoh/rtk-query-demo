@@ -7,7 +7,8 @@ import { merge } from './utils';
 let items = getItems();
 
 const missionHandlers = [
-  http.get('/api/v1/item', () => {
+  http.get('/api/v1/item', async () => {
+    await delay();
     return HttpResponse.json(items);
   }),
   /*
@@ -36,6 +37,7 @@ const missionHandlers = [
       .map(({ id = nanoid(), name }) => ({id, name, _orderId: orderId }));
     items = merge(items, newItems, (a, b) => a.id === b.id);
     saveItems(items);
+    await delay();
     return HttpResponse.json(newItems);
   }),
   // POST `/api/v1/searchItems?orderId=1` to search by items by order
@@ -50,6 +52,7 @@ const missionHandlers = [
 
     const ids = await request.json() || [];
     const result = items.filter(i => ids.includes(i.id))
+    await delay();
     return HttpResponse.json(result);
   }),
   // DELETE `/api/v1/item?orderId=1` to delete all order items

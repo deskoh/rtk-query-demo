@@ -7,11 +7,13 @@ import { merge } from './utils';
 let orders = getOrders();
 
 const orderHandlers = [
-  http.get('/api/v1/order', () => {
+  http.get('/api/v1/order', async () => {
+    await delay();
     return HttpResponse.json(orders);
   }),
-  http.get('/api/v1/order/:id', ({ params: { id } }) => {
+  http.get('/api/v1/order/:id', async ({ params: { id } }) => {
     const item = orders.find(p => p.id === id);
+    await delay();
     return item ? HttpResponse.json(item) : new HttpResponse(null, {
       status: 404,
       statusText: 'Order not found',
@@ -48,7 +50,7 @@ const orderHandlers = [
     return HttpResponse.json(editedOrder)
   }),
   */
-  http.delete('/api/v1/order/:id', ({ params }) => {
+  http.delete('/api/v1/order/:id', async ({ params }) => {
     const { id } = params
     const index = orders.findIndex(o => o.id === id);
     if (index === -1) {
@@ -56,6 +58,7 @@ const orderHandlers = [
     }
     const [deletedOrder] = orders.splice(index, 1)
     saveOrders(orders);
+    await delay();
     return HttpResponse.json(deletedOrder)
   }),
 ]
