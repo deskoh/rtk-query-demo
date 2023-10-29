@@ -1,9 +1,9 @@
-import  { useGetOrderByIdQuery, useUpsertOrderMutation, useDeleteOrderMutation } from '../../services/order';
+import  { useGetOrderByIdQuery, useUpsertOrderMutation, useDeleteOrderMutation } from './orderApi';
 import {
   useSearchItemsQueryState,
   useUpsertOrderItemsMutation,
   useDeleteItemsMutation,
-} from '../../services/item';
+} from '../item/itemApi';
 import { useInitialOrderItemIds } from '../item/itemSlice';
 
 
@@ -26,6 +26,7 @@ const OrderCellRenderer = ({ data }) => {
       const editedItems = items.filter(i => i.__isDirty);
       // TODO: upsertOrderItems and deleteOrderItems will invalidate same tags twice
       // and will result in duplicate refetch
+      // Merge into single mutation: https://github.com/reduxjs/redux-toolkit/issues/2203
       await Promise.all([
         upsertOrder(order).unwrap(),
         editedItems.length === 0

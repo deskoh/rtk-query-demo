@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
-import { deleteOrderItemAction } from '../../services/item';
-import { updateOrderAction } from '../../services/order';
+import { deleteOrderItemAction } from '../item/itemApi';
+import { updateOrderAction } from '../order/orderApi';
 
 const ItemCellRenderer = ({ data }) => {
   const dispatch = useDispatch();

@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { useSelector } from "react-redux";
 
-import { useGetOrderByIdQuery } from '../../services/order';
+import { useGetOrderByIdQuery } from './orderApi';
 
 const initialState = {
   // Avoid using selectedOrder as order could be mutated in cache

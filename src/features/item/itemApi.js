@@ -1,16 +1,10 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { api } from '../api/apiSlice';
 
-import { providesId } from './utils';
-import { saveInitialOrderItemIds } from '../features/item/itemSlice'
+import { providesId } from '../api/utils';
+import { saveInitialOrderItemIds } from './itemSlice'
 
 // Define a service using a base URL and expected endpoints
-export const itemApi = createApi({
-  reducerPath: 'itemApi',
-  baseQuery: fetchBaseQuery({ baseUrl: '/api/v1/' }),
-  keepUnusedDataFor: Number.MAX_SAFE_INTEGER,
-  refetchOnMountOrArgChange: false,
-  refetchOnFocus: false,
-  refetchOnReconnect: false,
+export const itemApi = api.injectEndpoints({
   // tagTypes: ['Item'],
   endpoints: (builder) => ({
     getItemById: builder.query({

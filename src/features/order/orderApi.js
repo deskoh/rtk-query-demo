@@ -1,15 +1,9 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { providesList } from './utils';
-import { mergeRetainDirty } from '../mocks/services/utils';
+import { api } from '../api/apiSlice';
+import { providesList } from '../api/utils';
+import { mergeRetainDirty } from '../../mocks/services/utils';
 
 // Define a service using a base URL and expected endpoints
-export const orderApi = createApi({
-  reducerPath: 'orderApi',
-  baseQuery: fetchBaseQuery({ baseUrl: '/api/v1/' }),
-  keepUnusedDataFor: Number.MAX_SAFE_INTEGER,
-  refetchOnMountOrArgChange: false,
-  refetchOnFocus: false,
-  refetchOnReconnect: false,
+export const orderApi = api.injectEndpoints({
   // tagTypes: ['Order'],
   endpoints: (builder) => ({
     // Cache key: getOrders(undefined)

@@ -8,8 +8,8 @@ import {
   editOrderItemAction,
   addOrderItemAction,
   clearOrderItemsAction,
-} from '../../services/item';
-import { updateOrderAction } from '../../services/order';
+} from '../item/itemApi';
+import { updateOrderAction } from '../order/orderApi';
 import { useSelectedOrder } from '../order/orderSlice';
 import { getEditedRowItem } from '../../app/GridUtils';
 import ItemCellRenderer from "./ItemCellRenderer";

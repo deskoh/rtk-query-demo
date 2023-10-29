@@ -1,22 +1,20 @@
-import { configureStore } from '@reduxjs/toolkit'
-import { setupListeners } from '@reduxjs/toolkit/query'
+import { configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
 
-import { orderApi } from '../services/order'
-import { itemApi } from '../services/item'
-import orderReducer from '../features/order/orderSlice'
-import itemReducer from '../features/item/itemSlice'
+import { api } from '../features/api/apiSlice';
+import orderReducer from '../features/order/orderSlice';
+import itemReducer from '../features/item/itemSlice';
 
 
 export const store = configureStore({
   devTools: process.env.NODE_ENV === 'development',
   reducer: {
-    [orderApi.reducerPath]: orderApi.reducer,
-    [itemApi.reducerPath]: itemApi.reducer,
+    [api.reducerPath]: api.reducer,
     order: orderReducer,
     item: itemReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(orderApi.middleware, itemApi.middleware),
+    getDefaultMiddleware().concat(api.middleware),
 
 });
 
