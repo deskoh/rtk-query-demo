@@ -75,8 +75,9 @@ const {
   useSearchItemsQuery,
   useUpsertOrderItemsMutation,
   useDeleteItemsMutation,
+  useDeleteOrderItemsMutation,
 } = itemApi
-export { useGetItemByIdQuery, useUpsertOrderItemsMutation, useDeleteItemsMutation };
+export { useGetItemByIdQuery, useUpsertOrderItemsMutation, useDeleteItemsMutation, useDeleteOrderItemsMutation };
 
 export const useSearchItemsQueryState = itemApi.endpoints.searchItems.useQueryState;
 

@@ -3,6 +3,7 @@ import {
   useSearchItemsQueryState,
   useUpsertOrderItemsMutation,
   useDeleteItemsMutation,
+  useDeleteOrderItemsMutation
 } from '../item/itemApi';
 import { useInitialOrderItemIds } from '../item/itemSlice';
 
@@ -18,7 +19,8 @@ const OrderCellRenderer = ({ data }) => {
   const [upsertOrder] = useUpsertOrderMutation();
   const [deleteOrder] = useDeleteOrderMutation();
   const [upsertOrderItems] = useUpsertOrderItemsMutation();
-  const [deleteOrderItems] = useDeleteItemsMutation();
+  const [deleteItems] = useDeleteItemsMutation();
+  const [deleteOrderItems] = useDeleteOrderItemsMutation();
   
   const saveOrderHandler = async () => {
     try {
@@ -34,7 +36,7 @@ const OrderCellRenderer = ({ data }) => {
           : upsertOrderItems({ orderId: data.id, items: editedItems }).unwrap(),
         deletedIds.length === 0
           ? Promise.resolve()
-          : deleteOrderItems(deletedIds),
+          : deleteItems(deletedIds),
       ]);
     } catch (e) {
       console.error(e);
@@ -43,7 +45,10 @@ const OrderCellRenderer = ({ data }) => {
 
   const deleteOrderHandler = async () => {
     try {
-      await deleteOrder(data.id);
+      await Promise.all([
+        deleteOrder(data.id),
+        deleteOrderItems(data.id),
+      ]);
     } catch (error) {
       console.log(error);
     }

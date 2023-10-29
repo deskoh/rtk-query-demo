@@ -61,19 +61,20 @@ const missionHandlers = [
     const url = new URL(request.url);
 
     const orderId = url.searchParams.get('orderId')
-    const body = await request.json();
+    let body = await request.text();
     if (!body && !orderId) {
       return new HttpResponse(null, {
         status: 400,
         statusText: 'orderId param or itemIds required',
       });
     }
-
+    
     if (orderId) {
       // Delete by orderID
       items = items.filter(i => i._orderId !== orderId);
     } else {
       // Delete by itemIds
+      body = JSON.parse(body);
       const idsToDelete = Array.isArray(body) ? body : [body];
       items = items.filter(i => !idsToDelete.some(id => id === i.id));
     }
