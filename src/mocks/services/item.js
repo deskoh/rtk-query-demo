@@ -68,7 +68,8 @@ const missionHandlers = [
         statusText: 'orderId param or itemIds required',
       });
     }
-    
+
+    const originalCount = items.length;
     if (orderId) {
       // Delete by orderID
       items = items.filter(i => i._orderId !== orderId);
@@ -81,7 +82,7 @@ const missionHandlers = [
 
     saveItems(items);
     await delay();
-    return HttpResponse.text('OK');
+    return HttpResponse.json({ deleteCount: originalCount - items.length});
   }),
 ]
 
