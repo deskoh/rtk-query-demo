@@ -43,7 +43,7 @@ export const itemApi = api.injectEndpoints({
       //   try {
       //     // Update items cache by forcing refetch
       //     await queryFulfilled;
-      //     dispatch(itemApi.endpoints.searchItems.initiate(
+      //     dispatch(itemApi.endpointss.searchItems.initiate(
       //       { orderId },
       //       { subscribe: false, forceRefetch: true }
       //     ));
@@ -52,6 +52,28 @@ export const itemApi = api.injectEndpoints({
       //   }
       // },
     }),
+    // Combine upsertOrderItems and deleteOrderItems as dispatching both actions seperately will
+    // invalidate `OrderItems` tag twice, resulting in double refetch
+    upsertAndDeleteOrderItems: builder.mutation({
+      async queryFn({ orderId, upsertItems, deleteIds}, _queryApi, _extraOptions, baseQuery) {
+        const [upserted, deleted] = await Promise.all([
+          upsertItems.length > 0 ? baseQuery({
+            url: `item?orderId=${orderId}`,
+            method: 'PUT',
+            body: upsertItems,
+          }) : Promise.resolve([]),
+          deleteIds.length > 0 ? baseQuery({
+            url: 'item',
+            method: 'DELETE',
+            body: deleteIds,
+          }) : Promise.resolve([]),
+        ]);
+        return { upserted, deleted };
+      },
+      // Following will re-fetch currently subscribed searchItems which is ok
+      invalidatesTags: ['OrderItems'],
+    }),
+    /*
     deleteItems: builder.mutation({
       query: (itemIds) => ({
         url: 'item',
@@ -60,6 +82,7 @@ export const itemApi = api.injectEndpoints({
       }),
       invalidatesTags: ['OrderItems'],
     }),
+    */
     deleteOrderItems: builder.mutation({
       query: (orderId) => ({
         url: `item?orderId=${orderId}`,
@@ -70,14 +93,14 @@ export const itemApi = api.injectEndpoints({
   }),
 })
 
-const {
+export const {
   useGetItemByIdQuery,
-  useSearchItemsQuery,
   useUpsertOrderItemsMutation,
-  useDeleteItemsMutation,
   useDeleteOrderItemsMutation,
-} = itemApi
-export { useGetItemByIdQuery, useUpsertOrderItemsMutation, useDeleteItemsMutation, useDeleteOrderItemsMutation };
+  useUpsertAndDeleteOrderItemsMutation,
+} = itemApi;
+
+const { useSearchItemsQuery } = itemApi;
 
 export const useSearchItemsQueryState = itemApi.endpoints.searchItems.useQueryState;
 
@@ -85,7 +108,7 @@ export const useGetOrderItemsQuery = (order, options) => {
   const { id, items } = order || {};
   const query = useSearchItemsQuery({
     orderId: id,
-    itemIds: items,  
+    itemIds: items,
   }, { skip: !order, ...options })
   return query;
 }
