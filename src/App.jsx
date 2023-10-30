@@ -1,4 +1,5 @@
 import './App.css';
+import Loading from './app/Loading';
 import Orders from './features/order/Orders';
 import Items from './features/item/Items';
 import { useIsLoading } from './features/api/utils';
@@ -10,7 +11,7 @@ function App() {
   const isLoading = useIsLoading();
   return (
     <div className="App">
-      { isLoading && 'Loading...'}
+      { isLoading && <Loading />}
       <h1>Orders</h1>
       <Orders />
       <h1>Items</h1>
