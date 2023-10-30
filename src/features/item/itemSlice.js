@@ -25,7 +25,6 @@ export const { saveInitialOrderItemIds, clearOrderItemIds } = itemSlice.actions
 export default itemSlice.reducer
 
 // Custom hook
-export const useInitialOrderItemIds = (orderId) => {
-  const initialOrderItemIds = useSelector((state) => state.item.initialOrderItemIds)
-  return initialOrderItemIds[orderId];
-};
+export const useInitialOrderItemIds = (orderId) =>  useSelector(
+  (state) => state.item.initialOrderItemIds[orderId],
+);
