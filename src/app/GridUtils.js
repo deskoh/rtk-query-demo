@@ -1,6 +1,4 @@
-export const getEditedRowItem = (cellEditRequestEvent, setDirty = false) => {
+export const getEditedRowItem = (cellEditRequestEvent) => {
   const { data, colDef: { field }, newValue } = cellEditRequestEvent;
   const editedItem = { ...data, [field]: newValue };
-  if (setDirty) editedItem.__isDirty = true;
-  return editedItem;
 }
