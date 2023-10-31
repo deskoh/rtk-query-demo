@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 
-import { api } from '../features/api/apiSlice';
-import orderReducer from '../features/order/orderSlice';
-import itemReducer from '../features/item/itemSlice';
+import { api } from 'features/api/apiSlice';
+import orderReducer from 'features/order/orderSlice';
+import itemReducer from 'features/item/itemSlice';
 
 
 export const store = configureStore({

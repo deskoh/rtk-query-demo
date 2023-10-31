@@ -1,7 +1,7 @@
 import { nanoid } from '@reduxjs/toolkit';
 import { http, HttpResponse, delay } from 'msw';
 
-import { getOrders, saveOrders } from '../data';
+import { getOrders, saveOrders } from 'mocks/data';
 import { merge } from './utils';
 
 let orders = getOrders();

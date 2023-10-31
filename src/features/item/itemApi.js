@@ -1,6 +1,6 @@
-import { api } from '../api/apiSlice';
-import { updateOrderAction } from '../order/orderApi';
-import { providesId } from '../api/utils';
+import { api } from 'features/api/apiSlice';
+import { updateOrderAction } from 'features/order/orderApi';
+import { providesId } from 'features/api/utils';
 import { saveInitialOrderItemIds } from './itemSlice'
 
 // Invalidate specific OrderItems tags to trigger refetch.

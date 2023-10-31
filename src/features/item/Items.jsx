@@ -8,9 +8,9 @@ import {
   editOrderItemAction,
   addOrderItemAction,
   clearOrderItemsAction,
-} from '../item/itemApi';
-import { useSelectedOrder } from '../order/orderSlice';
-import { getEditedRowItem } from '../../app/GridUtils';
+} from 'features/item/itemApi';
+import { useSelectedOrder } from 'features/order/orderSlice';
+import { getEditedRowItem } from 'app/GridUtils';
 import ItemCellRenderer from "./ItemCellRenderer";
 
 const columnDefs = [

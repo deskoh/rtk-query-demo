@@ -3,8 +3,8 @@ import { useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { AgGridReact } from "ag-grid-react";
 
-import { useGetOrdersQuery, updateOrderAction, useUpsertOrderMutation } from '../order/orderApi';
-import { getEditedRowItem } from '../../app/GridUtils';
+import { useGetOrdersQuery, updateOrderAction, useUpsertOrderMutation } from 'features/order/orderApi';
+import { getEditedRowItem } from 'app/GridUtils';
 import { selectOrderId, clearSelectedOrderId } from './orderSlice';
 import OrderCellRenderer from "./OrderCellRenderer";
 
