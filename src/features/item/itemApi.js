@@ -3,6 +3,10 @@ import { updateOrderAction } from '../order/orderApi';
 import { providesId } from '../api/utils';
 import { saveInitialOrderItemIds } from './itemSlice'
 
+// Invalidate specific OrderItems tags to trigger refetch.
+// Without orderId, all OrderItems not subscribed will be removed
+const invalidatesTags =  (_result, _error, arg) => [{ type: 'OrderItems', id: arg.orderId ?? arg }];
+
 // Define a service using a base URL and expected endpoints
 export const itemApi = api.injectEndpoints({
   // tagTypes: ['Item'],
@@ -36,22 +40,7 @@ export const itemApi = api.injectEndpoints({
         method: 'PUT',
         body: items,
       }),
-      // Following will re-fetch currently subscribed searchItems which is ok
-      // TODO(BUG): Subscribed OrderItems will be re-fetched and the rest will be deleted
-      invalidatesTags: ['OrderItems'],
-      // Manual refetch below not required due to tag invalidation
-      // async onQueryStarted({ orderId }, { dispatch, queryFulfilled }) {
-      //   try {
-      //     // Update items cache by forcing refetch
-      //     await queryFulfilled;
-      //     dispatch(itemApi.endpointss.searchItems.initiate(
-      //       { orderId },
-      //       { subscribe: false, forceRefetch: true }
-      //     ));
-      //   } catch (err) {
-      //     // TODO: handle error
-      //   }
-      // },
+      invalidatesTags,
     }),
     // Combine upsertOrderItems and deleteOrderItems as dispatching both actions seperately will
     // invalidate `OrderItems` tag twice, resulting in double refetch
@@ -71,28 +60,14 @@ export const itemApi = api.injectEndpoints({
         ]);
         return { upserted, deleted };
       },
-      // Following will re-fetch currently subscribed searchItems which is ok
-      // TODO(BUG): Subscribed OrderItems will be re-fetched and the rest will be deleted
-      invalidatesTags: ['OrderItems'],
+      invalidatesTags,
     }),
-    /*
-    deleteItems: builder.mutation({
-      query: (itemIds) => ({
-        url: 'item',
-        method: 'DELETE',
-        body: itemIds,
-      }),
-      // TODO(BUG): Subscribed OrderItems will be re-fetched and the rest will be deleted
-      invalidatesTags: ['OrderItems'],
-    }),
-    */
     deleteOrderItems: builder.mutation({
       query: (orderId) => ({
         url: `item?orderId=${orderId}`,
         method: 'DELETE',
       }),
-      // TODO(BUG): Subscribed OrderItems will be re-fetched and the rest will be deleted
-      invalidatesTags: ['OrderItems'],
+      invalidatesTags,
     }),
   }),
 })
