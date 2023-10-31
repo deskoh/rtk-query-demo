@@ -1,5 +1,6 @@
 import './App.css';
 import Loading from './app/Loading';
+import DevTool from './app/DevTool';
 import Orders from './features/order/Orders';
 import Items from './features/item/Items';
 import { useIsLoading } from './features/api/utils';
@@ -16,6 +17,7 @@ function App() {
       <Orders />
       <h1>Items</h1>
       <Items />
+      <DevTool />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { api } from 'features/api/apiSlice';
 import { providesList } from 'features/api/utils';
 import { mergeRetainDirty } from 'mocks/services/utils';
+import orderCacheEntryAddedHandler from './orderCacheEntryAddedHandler';
 
 // Define a service using a base URL and expected endpoints
 export const orderApi = api.injectEndpoints({
@@ -19,6 +20,7 @@ export const orderApi = api.injectEndpoints({
         const result = mergeRetainDirty(newCache, orders, (curr, o) => curr.id === o.id);
         return result;
       },
+      onCacheEntryAdded: orderCacheEntryAddedHandler,
     }),
     upsertOrder: builder.mutation({
       query: (order) => ({

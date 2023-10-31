@@ -23,6 +23,8 @@ const OrderCellRenderer = ({ data }) => {
 
   const saveOrderHandler = async () => {
     try {
+      // Alternative means to read cache:
+      // itemApi.endpoints.searchItems.select({ orderId: data.id })(store.getState());
       const deletedIds = initialItemIds.filter(id => !items.some(i => i.id === id));
       const editedItems = items.filter(i => i.__isDirty);
       await Promise.all([
