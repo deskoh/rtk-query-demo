@@ -110,7 +110,7 @@ export const addOrderItemAction = (orderId, newItem) => (dispatch) => {
     // Update cache entry with key `searchItems({ orderId })`
     'searchItems', { orderId }, (draftItems) => {
       // Generate client-side unique ID temporarily
-      draftItems.push({ ...newItem, __isDirty: true });
+      draftItems.push({ ...newItem, _orderId: orderId, __isDirty: true });
     }
   ));
 

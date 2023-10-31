@@ -32,7 +32,7 @@ const Items = () => {
   }, [dispatch, selectedOrder?.id]);
 
   const addOrderItem = useCallback(() => {
-    const newItem = { id: nanoid(), name: 'new item', _orderId: selectedOrder.id };
+    const newItem = { id: nanoid(), name: 'new item' };
     dispatch(addOrderItemAction(selectedOrder.id, newItem));
   }, [dispatch, selectedOrder]);
 
