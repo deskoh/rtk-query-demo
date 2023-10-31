@@ -37,6 +37,7 @@ export const itemApi = api.injectEndpoints({
         body: items,
       }),
       // Following will re-fetch currently subscribed searchItems which is ok
+      // TODO(BUG): Subscribed OrderItems will be re-fetched and the rest will be deleted
       invalidatesTags: ['OrderItems'],
       // Manual refetch below not required due to tag invalidation
       // async onQueryStarted({ orderId }, { dispatch, queryFulfilled }) {
@@ -71,6 +72,7 @@ export const itemApi = api.injectEndpoints({
         return { upserted, deleted };
       },
       // Following will re-fetch currently subscribed searchItems which is ok
+      // TODO(BUG): Subscribed OrderItems will be re-fetched and the rest will be deleted
       invalidatesTags: ['OrderItems'],
     }),
     /*
@@ -80,6 +82,7 @@ export const itemApi = api.injectEndpoints({
         method: 'DELETE',
         body: itemIds,
       }),
+      // TODO(BUG): Subscribed OrderItems will be re-fetched and the rest will be deleted
       invalidatesTags: ['OrderItems'],
     }),
     */
@@ -88,6 +91,7 @@ export const itemApi = api.injectEndpoints({
         url: `item?orderId=${orderId}`,
         method: 'DELETE',
       }),
+      // TODO(BUG): Subscribed OrderItems will be re-fetched and the rest will be deleted
       invalidatesTags: ['OrderItems'],
     }),
   }),
@@ -155,13 +159,6 @@ export const deleteOrderItemAction = (orderId, itemId) => (dispatch) => {
   // Update parent order to mark as dirty
   dispatch(updateOrderAction(orderId));
 }
-
-export const clearOrderItemsAction2 = (orderId) => itemApi.util.updateQueryData(
-  // Update cache entry with key `searchItems({ orderId })`
-  'searchItems', { orderId }, (draftItems) => {
-    draftItems.length = 0;
-  }
-)
 
 export const clearOrderItemsAction = (orderId) => (dispatch) => {
   dispatch(itemApi.util.updateQueryData(
