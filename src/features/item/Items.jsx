@@ -9,7 +9,6 @@ import {
   addOrderItemAction,
   clearOrderItemsAction,
 } from '../item/itemApi';
-import { updateOrderAction } from '../order/orderApi';
 import { useSelectedOrder } from '../order/orderSlice';
 import { getEditedRowItem } from '../../app/GridUtils';
 import ItemCellRenderer from "./ItemCellRenderer";
@@ -30,27 +29,15 @@ const Items = () => {
   const onCellEditRequest = useCallback((event) => {
     const editedItem = getEditedRowItem(event, true);
     dispatch(editOrderItemAction(selectedOrder.id, editedItem));
-
-    // Update parent order to mark as dirty
-    dispatch(updateOrderAction(selectedOrder.id));
   }, [dispatch, selectedOrder?.id]);
 
   const addOrderItem = useCallback(() => {
-    const newItem = { id: nanoid(), name: 'new item', _orderId: selectedOrder.id , __isDirty: true };
+    const newItem = { id: nanoid(), name: 'new item', _orderId: selectedOrder.id };
     dispatch(addOrderItemAction(selectedOrder.id, newItem));
-
-    // Update parent order
-    dispatch(updateOrderAction(
-      selectedOrder.id,
-      (draftOrder) => { draftOrder.itemsCount = items?.length; },
-    ));
-  }, [dispatch, selectedOrder, items?.length]);
+  }, [dispatch, selectedOrder]);
 
   const clearItems = useCallback(() => {
     dispatch(clearOrderItemsAction(selectedOrder.id));
-
-    // Update parent order to mark as dirty
-    dispatch(updateOrderAction(selectedOrder.id));
   }, [dispatch, selectedOrder]);
 
   return (

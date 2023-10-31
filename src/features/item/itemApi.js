@@ -1,7 +1,11 @@
 import { api } from '../api/apiSlice';
-
+import { updateOrderAction } from '../order/orderApi';
 import { providesId } from '../api/utils';
 import { saveInitialOrderItemIds } from './itemSlice'
+
+// Invalidate specific OrderItems tags to trigger refetch.
+// Without orderId, all OrderItems not subscribed will be removed
+const invalidatesTags =  (_result, _error, arg) => [{ type: 'OrderItems', id: arg.orderId ?? arg }];
 
 // Define a service using a base URL and expected endpoints
 export const itemApi = api.injectEndpoints({
@@ -36,21 +40,7 @@ export const itemApi = api.injectEndpoints({
         method: 'PUT',
         body: items,
       }),
-      // Following will re-fetch currently subscribed searchItems which is ok
-      invalidatesTags: ['OrderItems'],
-      // Manual refetch below not required due to tag invalidation
-      // async onQueryStarted({ orderId }, { dispatch, queryFulfilled }) {
-      //   try {
-      //     // Update items cache by forcing refetch
-      //     await queryFulfilled;
-      //     dispatch(itemApi.endpointss.searchItems.initiate(
-      //       { orderId },
-      //       { subscribe: false, forceRefetch: true }
-      //     ));
-      //   } catch (err) {
-      //     // TODO: handle error
-      //   }
-      // },
+      invalidatesTags,
     }),
     // Combine upsertOrderItems and deleteOrderItems as dispatching both actions seperately will
     // invalidate `OrderItems` tag twice, resulting in double refetch
@@ -70,25 +60,14 @@ export const itemApi = api.injectEndpoints({
         ]);
         return { upserted, deleted };
       },
-      // Following will re-fetch currently subscribed searchItems which is ok
-      invalidatesTags: ['OrderItems'],
+      invalidatesTags,
     }),
-    /*
-    deleteItems: builder.mutation({
-      query: (itemIds) => ({
-        url: 'item',
-        method: 'DELETE',
-        body: itemIds,
-      }),
-      invalidatesTags: ['OrderItems'],
-    }),
-    */
     deleteOrderItems: builder.mutation({
       query: (orderId) => ({
         url: `item?orderId=${orderId}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['OrderItems'],
+      invalidatesTags,
     }),
   }),
 })
@@ -114,35 +93,55 @@ export const useGetOrderItemsQuery = (order, options) => {
 }
 
 // Export methods to update cache
-export const editOrderItemAction = (orderId, editedItem) => itemApi.util.updateQueryData(
-  // Update cache entry with key `searchItems({ orderId })`
-  'searchItems', { orderId }, (draftItems) => {
-    const index = draftItems.findIndex(o => o.id === editedItem.id);
-    draftItems[index] = editedItem;
-  }
-)
-
-export const addOrderItemAction = (orderId, newItem) => itemApi.util.updateQueryData(
-  // Update cache entry with key `searchItems({ orderId })`
-  'searchItems', { orderId }, (draftItems) => {
-    // Generate client-side unique ID temporarily
-    draftItems.push(newItem);
-  }
-)
-
-export const deleteOrderItemAction = (orderId, itemId) => itemApi.util.updateQueryData(
-  // Update cache entry with key `searchItems({ orderId })`
-  'searchItems', { orderId }, (draftItems) => {
-    const index = draftItems.findIndex(o => o.id === itemId);
-    if (index > -1) {
-      draftItems.splice(index, 1);
+export const editOrderItemAction = (orderId, editedItem) => (dispatch) => {
+  dispatch(itemApi.util.updateQueryData(
+    // Update cache entry with key `searchItems({ orderId })`
+    'searchItems', { orderId }, (draftItems) => {
+      const index = draftItems.findIndex(o => o.id === editedItem.id);
+      draftItems[index] = { ...editedItem , __isDirty: true };
     }
-  }
-)
+  ));
+  // Update parent order to mark as dirty
+  dispatch(updateOrderAction(orderId));
+}
 
-export const clearOrderItemsAction = (orderId) => itemApi.util.updateQueryData(
-  // Update cache entry with key `searchItems({ orderId })`
-  'searchItems', { orderId }, (draftItems) => {
-    draftItems.length = 0;
-  }
-)
+export const addOrderItemAction = (orderId, newItem) => (dispatch) => {
+  dispatch(itemApi.util.updateQueryData(
+    // Update cache entry with key `searchItems({ orderId })`
+    'searchItems', { orderId }, (draftItems) => {
+      // Generate client-side unique ID temporarily
+      draftItems.push({ ...newItem, __isDirty: true });
+    }
+  ));
+
+  // Update parent order
+  dispatch(updateOrderAction(
+    orderId,
+    (draftOrder) => { draftOrder.itemsCount = '...'; },
+  ));
+}
+
+export const deleteOrderItemAction = (orderId, itemId) => (dispatch) => {
+  dispatch(itemApi.util.updateQueryData(
+    // Update cache entry with key `searchItems({ orderId })`
+    'searchItems', { orderId }, (draftItems) => {
+      const index = draftItems.findIndex(o => o.id === itemId);
+      if (index > -1) {
+        draftItems.splice(index, 1);
+      }
+    }
+  ));
+  // Update parent order to mark as dirty
+  dispatch(updateOrderAction(orderId));
+}
+
+export const clearOrderItemsAction = (orderId) => (dispatch) => {
+  dispatch(itemApi.util.updateQueryData(
+    // Update cache entry with key `searchItems({ orderId })`
+    'searchItems', { orderId }, (draftItems) => {
+      draftItems.length = 0;
+    }
+  ));
+  // Update parent order to mark as dirty
+  dispatch(updateOrderAction(orderId));
+}

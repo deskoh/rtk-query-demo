@@ -75,7 +75,7 @@ export const useGetOrderByIdQuery = (orderId) => useGetOrdersQuery(undefined, {
 // Export methods to update cache
 
 // Tricky to keep track of new order has been persisted when deleting order
-// as persisted order needs will require mutation, non-persisted order will require cache update
+// as persisted order will require mutation, non-persisted order will require cache update
 // USe `useUpsertOrderMutation` instead to ensure new orders ALWAYS persisted.
 // export const addOrderAction = (newOrder) => orderApi.util.updateQueryData(
 //   // Update cache entry with key `getOrders(undefined)`
