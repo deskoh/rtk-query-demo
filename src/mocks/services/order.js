@@ -2,9 +2,31 @@ import { nanoid } from '@reduxjs/toolkit';
 import { http, HttpResponse, delay } from 'msw';
 
 import { getOrders, saveOrders } from 'mocks/data';
+import { publishMessageToClient } from 'mocks/socketServer';
 import { merge } from './utils';
 
 let orders = getOrders();
+
+export const upsertOrder = async (id, name) => {
+  const order = {
+    id: !!id ? id: nanoid(),
+    name
+  };
+  orders = merge(orders, [order], (a, b) => a.id === b.id);
+  await delay();
+  saveOrders(orders);
+  publishMessageToClient({ type: 'order', event: 'upsert', payload: order });
+  return order;
+}
+
+export const deleteOrder = async (id) => {
+  const index = orders.findIndex(o => o.id === id);
+  const [deletedOrder] = orders.splice(index, 1)
+  saveOrders(orders);
+  await delay();
+  publishMessageToClient({ type: 'order', event: 'delete', payload: id });
+  return deletedOrder;
+}
 
 const orderHandlers = [
   http.get('/api/v1/order', async () => {
@@ -28,12 +50,8 @@ const orderHandlers = [
       });
     }
     // Remove extra fields and generate id if required
-    const { id = nanoid() , name } = body;
-    const order = { id, name };
-
-    orders = merge(orders, [order], (a, b) => a.id === b.id);
-    await delay();
-    saveOrders(orders);
+    const { id, name } = body;
+    const order = await upsertOrder(id, name)
     return HttpResponse.json(order, { status: 201 })
   }),
   /*
@@ -56,9 +74,7 @@ const orderHandlers = [
     if (index === -1) {
       return new HttpResponse(null, { status: 404 })
     }
-    const [deletedOrder] = orders.splice(index, 1)
-    saveOrders(orders);
-    await delay();
+    const deletedOrder = deleteOrder(id);
     return HttpResponse.json(deletedOrder)
   }),
 ]

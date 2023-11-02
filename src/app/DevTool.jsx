@@ -1,11 +1,24 @@
 import { useEffect, useState } from 'react';
 
 import { useSelectedOrder } from 'features/order/orderSlice';
-import { publishMessageToClient } from 'mocks/socketServer';
+import { upsertOrder, deleteOrder } from 'mocks/services/order';
 
-const publishEvent = (event, formData) => {
-  const { type, ...payload } = formData;
-  publishMessageToClient({ type, event, payload });
+const serverCreate = (formData) => {
+  if (formData.type === 'order') {
+    upsertOrder(undefined, formData.name)
+  }
+}
+
+const serverUpdate = (formData) => {
+  if (formData.type === 'order') {
+    upsertOrder(formData.id, formData.name)
+  }
+}
+
+const serverDelete = (formData) => {
+  if (formData.type === 'order') {
+    deleteOrder(formData.id)
+  }
 }
 
 const DevTool = () => {
@@ -32,7 +45,7 @@ const DevTool = () => {
     <div className="devTool">
       <b>Event Simulator</b>
       <div>
-        <label htmlFor="id">ID:</label>
+        <label htmlFor="id">ID (Create / Delete):</label>
         <input
           type="text"
           id="id"
@@ -74,9 +87,9 @@ const DevTool = () => {
           Item
         </label>
       </div>
-      <button onClick={() => publishEvent('create', formData)}>Create</button>
-      <button onClick={() => publishEvent('update', formData)}>Update</button>
-      <button onClick={() => publishEvent('delete', formData)}>Delete</button>
+      <button onClick={() => serverCreate(formData)}>Create</button>
+      <button onClick={() => serverUpdate(formData)}>Update</button>
+      <button onClick={() => serverDelete(formData)}>Delete</button>
     </div>
   );
 }

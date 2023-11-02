@@ -1,7 +1,7 @@
 import { api } from 'features/api/apiSlice';
 import { providesList } from 'features/api/utils';
 import { mergeRetainDirty } from 'mocks/services/utils';
-import orderCacheEntryAddedHandler from './orderCacheEntryAddedHandler';
+import setupSocketEventHandler from './setupSocketEventHandler';
 
 // Define a service using a base URL and expected endpoints
 export const orderApi = api.injectEndpoints({
@@ -20,7 +20,25 @@ export const orderApi = api.injectEndpoints({
         const result = mergeRetainDirty(newCache, orders, (curr, o) => curr.id === o.id);
         return result;
       },
-      onCacheEntryAdded: orderCacheEntryAddedHandler,
+      async onCacheEntryAdded(
+        arg,
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+      ) {
+        // create a websocket connection when the cache subscription starts
+        const ws = new WebSocket('ws://localhost')
+        try {
+          // wait for the initial query to resolve before proceeding
+          await cacheDataLoaded
+          setupSocketEventHandler(ws, updateCachedData);
+        } catch {
+          // no-op in case `cacheEntryRemoved` resolves before `cacheDataLoaded`,
+          // in which case `cacheDataLoaded` will throw
+        }
+        // cacheEntryRemoved will resolve when the cache subscription is no longer active
+        await cacheEntryRemoved
+        // perform cleanup steps once the `cacheEntryRemoved` promise resolves
+        ws.close()
+      }
     }),
     upsertOrder: builder.mutation({
       query: (order) => ({
