@@ -34,7 +34,11 @@ const missionHandlers = [
     }
     // Remove extra fields and generate id if required and force orderId value
     const newItems = (Array.isArray(body) ? body : [body])
-      .map(({ id = nanoid(), name }) => ({id, name, _orderId: orderId }));
+      .map(({ id = nanoid(), name }) => {
+        // Replace client-generated IDs with server-generated IDs for new items
+        if (items.findIndex(i => i.id === id) === -1) id = nanoid();
+        return {id, name, _orderId: orderId };
+      });
     items = merge(items, newItems, (a, b) => a.id === b.id);
     saveItems(items);
     await delay();

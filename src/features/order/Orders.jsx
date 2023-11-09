@@ -36,7 +36,7 @@ const Orders = () => {
 
   const addOrderHandler = useCallback(async () => {
     // Order will be persisted, no need to set dirty flag
-    const newOrder = { id: nanoid(), name: 'new order' };
+    const newOrder = { name: 'new order' };
     try {
       await upsertOrder(newOrder).unwrap();
     } catch (e) {

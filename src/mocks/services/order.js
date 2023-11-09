@@ -12,6 +12,8 @@ export const upsertOrder = async (id, name) => {
     id: !!id ? id: nanoid(),
     name
   };
+  // Replace client-generated IDs with server-generated IDs for new items
+  if (orders.findIndex(o => o.id === order.id) === -1) order.id = nanoid();
   orders = merge(orders, [order], (a, b) => a.id === b.id);
   await delay();
   saveOrders(orders);
