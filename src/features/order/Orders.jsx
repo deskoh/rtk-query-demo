@@ -3,6 +3,7 @@ import { useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { AgGridReact } from "ag-grid-react";
 
+import { Dropdown } from 'features/api/utils';
 import { useGetOrdersQuery, updateOrderAction, useUpsertOrderMutation } from 'features/order/orderApi';
 import { getEditedRowItem } from 'app/GridUtils';
 import { selectOrderId, clearSelectedOrderId } from './orderSlice';
@@ -48,6 +49,7 @@ const Orders = () => {
     <div style={{ height: '200px', width: '100%' }}>
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         <div style={{ marginBottom: '4px' }}>
+          <Dropdown />
           <button onClick={() => addOrderHandler()}>Add Order</button>
         </div>
         <div className="ag-theme-alpine" style={{ height: '100%' }}>
