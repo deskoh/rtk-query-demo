@@ -1,15 +1,15 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 
-import { useGetOrderByIdQuery } from './orderApi';
+import { useGetOrderByIdQuery } from "./orderApi";
 
 const initialState = {
   // Avoid using selectedOrder as order could be mutated in cache
   selectedOrderId: undefined,
-}
+};
 
 export const orderSlice = createSlice({
-  name: 'order',
+  name: "order",
   initialState,
   reducers: {
     // Store Id instead of actual order since it is immutable and will be stale when order in cache is updated.
@@ -17,18 +17,19 @@ export const orderSlice = createSlice({
       state.selectedOrderId = action.payload;
     },
     clearSelectedOrderId: (state) => {
-      state.selectedOrder = undefined;
+      state.selectedOrderId = undefined;
     },
   },
-})
+});
 
 // Action creators are generated for each case reducer function
-export const { selectOrder, selectOrderId, clearSelectedOrderId } = orderSlice.actions
+export const { selectOrder, selectOrderId, clearSelectedOrderId } =
+  orderSlice.actions;
 
-export default orderSlice.reducer
+export default orderSlice.reducer;
 
 // Custom hook
 export const useSelectedOrder = () => {
-  const selectedOrderId = useSelector((state) => state.order.selectedOrderId)
+  const selectedOrderId = useSelector((state) => state.order.selectedOrderId);
   return useGetOrderByIdQuery(selectedOrderId);
 };
