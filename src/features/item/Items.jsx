@@ -24,7 +24,7 @@ const Items = () => {
   const dispatch = useDispatch();
 
   const { data: selectedOrder } = useSelectedOrder();
-  const { data: items } = useGetOrderItemsQuery(selectedOrder);
+  const { data: items } = useGetOrderItemsQuery(selectedOrder?.id);
 
   const onCellEditRequest = useCallback((event) => {
     const editedItem = getEditedRowItem(event, true);

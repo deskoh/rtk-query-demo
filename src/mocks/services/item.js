@@ -6,6 +6,21 @@ import { merge } from './utils';
 
 let items = getItems();
 
+const groupedByOrderId = (items) => items.reduce((acc, item) => {
+  const orderId = item._orderId;
+  
+  // If the orderId doesn't exist in the accumulator, create an array for it
+  if (!acc[orderId]) {
+    acc[orderId] = [];
+  }
+  
+  // Push the current item to its orderId array
+  acc[orderId].push(item);
+  
+  return acc;
+}, {});
+
+
 const missionHandlers = [
   http.get('/api/v1/item', async () => {
     await delay();
@@ -41,7 +56,7 @@ const missionHandlers = [
     return HttpResponse.json(newItems);
   }),
   // POST `/api/v1/searchItems?orderId=1` to search by items by order
-  // POST `/api/v1/searchItems` with itemIds array body to search by Id
+  // POST `/api/v1/searchItems` with { orderIds: [], itemIds: [] } array body to search by Ids
   http.post('/api/v1/searchItems', async ({ request }) => {
     const url = new URL(request.url);
     const orderId = url.searchParams.get('orderId')
@@ -50,8 +65,10 @@ const missionHandlers = [
       return HttpResponse.json(result);
     }
 
-    const ids = await request.json() || [];
-    const result = items.filter(i => ids.includes(i.id))
+    const { orderIds = [], itemIds = [] } = await request.json() || {};
+    const result = orderIds
+      ? groupedByOrderId(items.filter(i => orderIds.includes(i._orderId)))
+      : items.filter(i => itemIds.includes(i.id))
     await delay();
     return HttpResponse.json(result);
   }),

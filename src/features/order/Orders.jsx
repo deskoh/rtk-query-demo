@@ -3,7 +3,7 @@ import { useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { AgGridReact } from "ag-grid-react";
 
-import { useGetOrdersQuery, updateOrderAction, useUpsertOrderMutation } from 'features/order/orderApi';
+import { useGetOrdersQuery, updateOrderAction, useUpsertOrderMutation, orderApi } from 'features/order/orderApi';
 import { getEditedRowItem } from 'app/GridUtils';
 import { selectOrderId, clearSelectedOrderId } from './orderSlice';
 import OrderCellRenderer from "./OrderCellRenderer";
@@ -44,11 +44,16 @@ const Orders = () => {
     }
   }, [upsertOrder]);
 
+  const test = () => {
+    dispatch(orderApi.endpoints.searchItemsBatch.initiate({ orderIds: ['ri6CHMGrjxpxN4dkO0g24', 'bq9oe9MrLaNA5PSgqTC8h'] }));
+  }
+
   return (
     <div style={{ height: '200px', width: '100%' }}>
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         <div style={{ marginBottom: '4px' }}>
           <button onClick={() => addOrderHandler()}>Add Order</button>
+          <button onClick={() => test()}>Test Batch</button>
         </div>
         <div className="ag-theme-alpine" style={{ height: '100%' }}>
           <AgGridReact
@@ -65,7 +70,7 @@ const Orders = () => {
 
             // onRowValueChanged={onRowValueChanged}
             editType={"fullRow"}
-          ></AgGridReact>
+          / >
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { api } from 'features/api/apiSlice';
 import { updateOrderAction } from 'features/order/orderApi';
 import { providesId } from 'features/api/utils';
 import { saveInitialOrderItemIds } from './itemSlice'
+import { store } from 'app/store';
 
 // Invalidate specific OrderItems tags to trigger refetch.
 // Without orderId, all OrderItems not subscribed will be removed
@@ -17,21 +18,67 @@ export const itemApi = api.injectEndpoints({
     }),
     searchItems: builder.query({
       // Using POST for Query instead of GET
-      query: ({ orderId, itemIds }) => ({
+      query: ({ orderId }) => ({
         url: `searchItems${orderId ? `?orderId=${orderId}` : ''}`,
         method: 'POST',
-        body: itemIds || [],
       }),
-      // Provide cache key manually to omit itemIds
+      // Provide cache key manually
       serializeQueryArgs: ({ queryArgs }) => {
-        const { orderId } = queryArgs
-        return { orderId } // omit `client` from the cache key
+        const { orderId } = queryArgs;
+        return `searchItems(${JSON.stringify(orderId)})`;
       },
       providesTags: (result, error, { orderId }) => providesId(result, orderId, 'OrderItems'),
-      // Store original item IDs to track deletion
+      // Store original item IDs in redux store to track deletion
       async onQueryStarted({ orderId }, { dispatch, queryFulfilled }) {
         const { data: items } = await queryFulfilled;
         dispatch(saveInitialOrderItemIds({ orderId, itemIds: items.map(i => i.id) }));
+      },
+    }),
+    // Batch queries results will be populated from `searchItems` if exists.
+    // Return results will be used to populated back to `searchItems` cache as well.
+    searchItemsBatch: builder.query({
+      // Using queryFn to optimize the query by removing OrderIds already in cache
+      queryFn: async ({ orderIds = [] }, _api, _extraOptions, baseQuery) => {
+        const strippedOrderIds = [...orderIds];
+        // Construct partial results for items already in cache.
+        const cachedPartialData = orderIds.reduce((cachedItems, orderId) => {
+          const { data: items } = itemApi.endpoints.searchItems.select({ orderId })(store.getState());
+          if (items) {
+            // Remove orderId to prevent duplicate query
+            strippedOrderIds.splice(strippedOrderIds.indexOf(orderId), 1);
+            cachedItems[orderId] = items;
+          }
+          return cachedItems;
+        }, {});
+
+        // Skip request if all orderIds are already in cache
+        const result = strippedOrderIds.length > 0 
+          ? await baseQuery({
+            url: 'searchItems',
+            method: 'POST',
+            body: { orderIds: strippedOrderIds },
+          })
+          : { data: {} };
+        
+        // Merge cachedPartialData into result.data
+        const data = { ...cachedPartialData, ...result.data };
+        return { data };
+      },
+      // Do not cache batch queries the cache will be populated from `searchItems` query cache
+      keepUnusedDataFor: 0,
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        Object.entries(data).forEach(([orderId, items]) => {
+          // Add to searchItems cache if it does not exists. No should be required as data in the cache will be the same.
+          const { data: searchItemsCache  } = itemApi.endpoints.searchItems.select({ orderId })(store.getState());
+          if (!searchItemsCache) {
+            // First insertion into cache seemed will trigger `searchItems` onQueryStarted
+            dispatch(api.util.upsertQueryData('searchItems', { orderId }, items));
+          }
+          // Following not required as the above seemed to trigger `searchItems` onQueryStarted
+          // Store original item IDs in redux store to track deletion
+          // dispatch(saveInitialOrderItemIds({ orderId, itemIds: items.map(i => i.id) }));
+        });
       },
     }),
     upsertOrderItems: builder.mutation({
@@ -77,19 +124,24 @@ export const {
   useUpsertOrderItemsMutation,
   useDeleteOrderItemsMutation,
   useUpsertAndDeleteOrderItemsMutation,
+  // Temp export for testing
+  useSearchItemsBatchQuery,
 } = itemApi;
 
 const { useSearchItemsQuery } = itemApi;
 
 export const useSearchItemsQueryState = itemApi.endpoints.searchItems.useQueryState;
 
-export const useGetOrderItemsQuery = (order, options) => {
-  const { id, items } = order || {};
-  const query = useSearchItemsQuery({
-    orderId: id,
-    itemIds: items,
-  }, { skip: !order, ...options })
-  return query;
+export const useGetOrderItemsQuery = (orderIds = [], options) => {
+  const orderIdsArray = Array.isArray(orderIds) ? orderIds : [orderIds];
+  if (orderIdsArray.length <= 1) {
+    return useSearchItemsQuery({
+      orderId: orderIdsArray[0],
+    }, { skip: orderIdsArray.length === 0, ...options })
+  }
+  return useSearchItemsBatchQuery({
+    orderIds: orderIdsArray,
+  }, options)
 }
 
 // Export methods to update cache
