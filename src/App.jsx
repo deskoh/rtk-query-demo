@@ -31,6 +31,8 @@ ModuleRegistry.registerModules([
   CustomEditorModule,
  ]); 
 
+import BatchTest from "./features/order/BatchTest";
+
 function App() {
   const isLoading = useIsLoading();
   return (
@@ -40,6 +42,7 @@ function App() {
       <Orders />
       <h1>Items</h1>
       <Items />
+      <BatchTest />
     </div>
   );
 }
