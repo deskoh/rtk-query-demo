@@ -66,6 +66,11 @@ export const itemApi = api.injectEndpoints({
       },
       // Do not cache batch queries the cache will be populated from `searchItems` query cache
       keepUnusedDataFor: 0,
+      providesTags: (result, _error, { orderIds }) => {
+        return orderIds.reduce((tags, orderId) => {
+          return tags.concat(providesId(result, orderId, 'OrderItemsBatch'));
+        } , []);
+      },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         const { data } = await queryFulfilled;
         Object.entries(data).forEach(([orderId, items]) => {
@@ -119,6 +124,14 @@ export const itemApi = api.injectEndpoints({
   }),
 })
 
+// const selectSearchItems = api.endpoints.searchItems.select();
+
+// const unsubscribe = store.subscribe(() => {
+//   const newValue = selectSearchItems(store.getState());
+//   console.log('Cache changed:', newValue);
+// });
+
+
 export const {
   useGetItemByIdQuery,
   useUpsertOrderItemsMutation,
@@ -144,6 +157,14 @@ export const useGetOrderItemsQuery = (orderIds = [], options) => {
   }, options)
 }
 
+/**
+ * Invalidate searchItemsBatch tags
+ */
+const invalidateBatchItemsResults = (dispatch, orderId) => {
+  // Invalidate all OrderItemsBatch tags
+  dispatch(api.util.invalidateTags([{ type: 'OrderItemsBatch', id: orderId }]));
+}
+
 // Export methods to update cache
 export const editOrderItemAction = (orderId, editedItem) => (dispatch) => {
   dispatch(itemApi.util.updateQueryData(
@@ -155,6 +176,8 @@ export const editOrderItemAction = (orderId, editedItem) => (dispatch) => {
   ));
   // Update parent order to mark as dirty
   dispatch(updateOrderAction(orderId));
+  
+  invalidateBatchItemsResults(dispatch, orderId);
 }
 
 export const addOrderItemAction = (orderId, newItem) => (dispatch) => {
@@ -171,6 +194,8 @@ export const addOrderItemAction = (orderId, newItem) => (dispatch) => {
     orderId,
     (draftOrder) => { draftOrder.itemsCount = '...'; },
   ));
+  
+  invalidateBatchItemsResults(dispatch, orderId);
 }
 
 export const deleteOrderItemAction = (orderId, itemId) => (dispatch) => {
@@ -185,6 +210,8 @@ export const deleteOrderItemAction = (orderId, itemId) => (dispatch) => {
   ));
   // Update parent order to mark as dirty
   dispatch(updateOrderAction(orderId));
+  
+  invalidateBatchItemsResults(dispatch, orderId);
 }
 
 export const clearOrderItemsAction = (orderId) => (dispatch) => {
@@ -196,4 +223,6 @@ export const clearOrderItemsAction = (orderId) => (dispatch) => {
   ));
   // Update parent order to mark as dirty
   dispatch(updateOrderAction(orderId));
+  
+  invalidateBatchItemsResults(dispatch, orderId);
 }
