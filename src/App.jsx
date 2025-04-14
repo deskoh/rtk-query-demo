@@ -1,11 +1,35 @@
+import { ModuleRegistry } from 'ag-grid-community'; 
+import {
+  ClientSideRowModelModule,
+  ValidationModule,
+  RowSelectionModule,
+  TextEditorModule,
+  NumberEditorModule,
+  DateEditorModule,
+  CheckboxEditorModule,
+  LargeTextEditorModule,
+  SelectEditorModule,
+  CustomEditorModule
+} from 'ag-grid-community'; 
+
 import './App.css';
 import Loading from './app/Loading';
 import Orders from './features/order/Orders';
 import Items from './features/item/Items';
 import { useIsLoading } from './features/api/utils';
 
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
+ModuleRegistry.registerModules([
+  ClientSideRowModelModule,
+  ValidationModule,
+  RowSelectionModule,
+  TextEditorModule,
+  NumberEditorModule,
+  DateEditorModule,
+  CheckboxEditorModule,
+  LargeTextEditorModule,
+  SelectEditorModule,
+  CustomEditorModule,
+ ]); 
 
 function App() {
   const isLoading = useIsLoading();

@@ -15,6 +15,12 @@ const columnDefs = [
   { headerName: "Save", cellRenderer: OrderCellRenderer },
 ];
 
+const rowSelection = {
+  mode: "singleRow",
+  checkboxes: false,
+  enableClickSelection: true,
+};
+
 const Orders = () => {
   const gridRef = useRef();
   const dispatch = useDispatch();
@@ -65,7 +71,7 @@ const Orders = () => {
             readOnlyEdit={true}
             onCellEditRequest={onCellEditRequest}
             // Enable single row selection
-            rowSelection={'single'}
+            rowSelection={rowSelection}
             onSelectionChanged={onSelectionChanged}
 
             // onRowValueChanged={onRowValueChanged}

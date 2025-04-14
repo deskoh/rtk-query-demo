@@ -19,6 +19,13 @@ const columnDefs = [
   { headerName: "Actions", cellRenderer: ItemCellRenderer },
 ];
 
+const rowSelection = {
+  mode: "multiRow",
+  checkboxes: false,
+  headerCheckbox: false,
+  enableClickSelection: true,
+};
+
 const Items = () => {
   const gridRef = useRef();
   const dispatch = useDispatch();
@@ -57,7 +64,7 @@ const Items = () => {
             // Set readOnlyEdit to true to fire onCellEditRequest as rowData is immutable
             readOnlyEdit={true}
             onCellEditRequest={onCellEditRequest}
-            rowSelection={'multiple'}
+            rowSelection={rowSelection}
             />
         </div>
       </div>
